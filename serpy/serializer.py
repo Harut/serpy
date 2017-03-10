@@ -105,7 +105,7 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
         self.many = many
         self._data = None
 
-    def _serialize(self, instance, fields, context):
+    def _serialize(self, instance, fields):
         v = OrderedDict()
         for name, getter, to_value, call, required, pass_self in fields:
             if pass_self:
