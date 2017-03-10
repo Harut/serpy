@@ -1,9 +1,11 @@
+from collections import OrderedDict
 from serpy.fields import Field
 import operator
 import six
 
 
 class SerializerBase(Field):
+
     _field_map = {}
 
 
@@ -28,7 +30,7 @@ class SerializerMeta(type):
 
     @staticmethod
     def _get_fields(direct_fields, serializer_cls):
-        field_map = {}
+        field_map = OrderedDict()
         # Get all the fields from base classes.
         for cls in serializer_cls.__mro__[::-1]:
             if issubclass(cls, SerializerBase):
@@ -52,6 +54,9 @@ class SerializerMeta(type):
                 direct_fields[attr_name] = field
         for k in direct_fields.keys():
             del attrs[k]
+
+        direct_fields = OrderedDict(sorted(direct_fields.items(),
+                                           key=lambda i: i[1]._creation_counter))
 
         real_cls = super(SerializerMeta, cls).__new__(cls, name, bases, attrs)
 
@@ -103,7 +108,7 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
         self._data = None
 
     def _serialize(self, instance, fields, context):
-        v = {}
+        v = OrderedDict()
         for name, getter, to_value, call, required, pass_self in fields:
             if pass_self:
                 # MethodField
@@ -136,6 +141,15 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
         if self._data is None:
             self._data = self.to_value(self.instance, self.context)
         return self._data
+
+    @classmethod
+    def sort_fields(cls, example):
+        def key_func(f):
+            if f[0] in example:
+                return example.index(f[0])
+            return len(cls._compiled_fields) + 1
+
+        cls._compiled_fields = tuple(sorted(cls._compiled_fields, key=key_func))
 
 
 class DictSerializer(Serializer):
