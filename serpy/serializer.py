@@ -23,7 +23,7 @@ def _compile_field_to_tuple(field, name, serializer_cls):
     name = field.label or name
 
     return (name, getter, to_value, field.call, field.required,
-            field.getter_takes_serializer)
+            field.getter_takes_serializer, field.drop_if_empty)
 
 
 class SerializerMeta(type):
@@ -110,8 +110,10 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
         self._data = None
 
     def _serialize(self, instance, fields, context):
+        if instance is None:
+            return None
         v = OrderedDict()
-        for name, getter, to_value, call, required, pass_self in fields:
+        for name, getter, to_value, call, required, pass_self, drop_if_empty in fields:
             if pass_self:
                 # MethodField
                 result = getter(self, instance, context)
@@ -122,7 +124,8 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
                         result = result()
                     if to_value:
                         result = to_value(result, context)
-            v[name] = result
+            if result is not None or not drop_if_empty:
+                v[name] = result
 
         return v
 

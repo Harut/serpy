@@ -13,6 +13,8 @@ class GlobalCounter(object):
 
 global_counter = GlobalCounter()
 
+EMPTY_VALUES = (None, '', [], (), {})
+
 
 class Field(object):
     """:class:`Field` is used to define what attributes will be serialized.
@@ -36,6 +38,10 @@ class Field(object):
     #: :meth:`Field.as_getter` requires the serializer to be passed in as the
     #: first argument. Otherwise, the object will be the only parameter.
     getter_takes_serializer = False
+
+    #: Set to ``True`` if the value should not present in serialized object
+    #: if it is empty.
+    drop_if_empty = False
 
     def __init__(self, attr=None, call=False, label=None, required=True):
         self.attr = attr
@@ -95,6 +101,8 @@ class StrField(Field):
 
     @staticmethod
     def to_value(value, context):
+        if value in EMPTY_VALUES:
+            return None
         return six.text_type(value)
 
 
@@ -103,6 +111,8 @@ class IntField(Field):
 
     @staticmethod
     def to_value(value, context):
+        if value in EMPTY_VALUES:
+            return None
         return int(value)
 
 
@@ -111,6 +121,8 @@ class FloatField(Field):
 
     @staticmethod
     def to_value(value, context):
+        if value in EMPTY_VALUES:
+            return None
         return float(value)
 
 
@@ -119,6 +131,8 @@ class BoolField(Field):
 
     @staticmethod
     def to_value(value, context):
+        if value in EMPTY_VALUES:
+            return None
         return bool(value)
 
 
