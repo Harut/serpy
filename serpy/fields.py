@@ -99,10 +99,15 @@ class Field(object):
 class StrField(Field):
     """A :class:`Field` that converts the value to a string."""
 
-    @staticmethod
-    def to_value(value, context):
-        if value in EMPTY_VALUES:
-            return None
+    def __init__(self, *args, **kwargs):
+        self.allow_none = kwargs.pop('allow_none', False)
+        Field.__init__(self, *args, **kwargs)
+
+    def to_value(self, value, context):
+        if value is None:
+            if self.allow_none:
+                return None
+            value = ''
         return six.text_type(value)
 
 

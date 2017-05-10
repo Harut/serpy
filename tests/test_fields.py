@@ -31,6 +31,15 @@ class TestFields(unittest.TestCase):
         self.assertEqual(field.to_value('a', None), 'a')
         self.assertEqual(field.to_value(5, None), '5')
 
+    def test_str_field_none(self):
+        field = StrField()
+        self.assertEqual(field.to_value('', None), '')
+        self.assertEqual(field.to_value(None, None), '')
+
+        field = StrField(allow_none=True)
+        self.assertEqual(field.to_value('', None), '')
+        self.assertEqual(field.to_value(None, None), None)
+
     def test_bool_field(self):
         field = BoolField()
         self.assertTrue(field.to_value(True, None))
