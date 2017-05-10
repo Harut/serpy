@@ -107,7 +107,7 @@ class StrField(Field):
         if value is None:
             if self.allow_none:
                 return None
-            value = ''
+            return u''
         return six.text_type(value)
 
 
