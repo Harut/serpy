@@ -101,13 +101,12 @@ class StrField(Field):
 
     def __init__(self, *args, **kwargs):
         self.allow_none = kwargs.pop('allow_none', False)
+        self.null_value = None if self.allow_none else ''
         Field.__init__(self, *args, **kwargs)
 
     def to_value(self, value, context):
         if value is None:
-            if self.allow_none:
-                return None
-            return u''
+            return self.null_value
         return six.text_type(value)
 
 
